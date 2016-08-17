@@ -1,10 +1,6 @@
 #include "clientconnection.h"
 #include "routingtable.h"
 #include "olyserver.h"
-#include <QTcpSocket>
-#include <assert.h>
-#include <QTextEdit>
-#include <QWidget>
 
 ClientConnection::ClientConnection(OlyServer *server, quint16 ID, QTcpSocket *connection, RoutingTable* table, QTextEdit* output_field, QObject *parent) : QObject(parent)
 {
@@ -49,17 +45,27 @@ void ClientConnection::slot_new_msg()
 
         in >> str;
 
-        strMsg = "\nMsg: "+ str + "\n MsgSize: " + QString::number(next_block_size);
+        strMsg = "Msg: "+ str + "\nMsgSize: " + QString::number(next_block_size);
 
         next_block_size = 0;
 
         output->append(strMsg);
+
         QTcpSocket* route_clients_addr = nullptr;
+
         for(int i = 0; i < arr_length; i++)
         {
-            route_clients_addr = current_server->get_connection(msg_routes[0][i]);
-            if(route_clients_addr && (route_clients_addr->state() ==  QAbstractSocket::ConnectedState))
-                sendData(route_clients_addr, "Server Response:: Recieved \"" + str + "\""); //QByteArray?
+            route_clients_addr = current_server->get_connection((*msg_routes)[i]);
+
+            if(route_clients_addr)
+            {
+                if(route_clients_addr->state() ==  QAbstractSocket::ConnectedState)
+                    sendData(route_clients_addr, "Server Response:: Recieved \"" + str + "\""); //QByteArray?
+                else
+                    output->append("QTcpSocket state for id " + QString::number((*msg_routes)[i]) + "is not \"Connected\"");
+            }
+            else
+                output->append("QTcpSocket value for id " + QString::number((*msg_routes)[i]) + "is not valid");
         }
     }
 }
@@ -67,7 +73,7 @@ void ClientConnection::slot_new_msg()
 void ClientConnection::slot_disconnected()
 {
     output->append("Connection closed.");
-    QThread::currentThread()->exit(0);
+    //QThread::currentThread()->exit(0);
 }
 
 void ClientConnection::sendData(QTcpSocket* connection, const QString& str)

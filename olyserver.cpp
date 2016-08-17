@@ -15,18 +15,18 @@
 
 OlyServer::~OlyServer()
 {
+    for(int i = 0; i < clients_online.length(); i++)
+    {
+        clients_online[i]->quit();
+        clients_online[i]->wait();
+    }
+
     delete [] txt_edit;
     delete [] m_hbox;
     delete m_vbox;
     delete m_edit;
     delete m_table;
     delete m_names;
-
-    for(int i = 0; i < clients_online.length(); i++)
-    {
-        clients_online[i]->quit();
-        clients_online[i]->wait();
-    }
 }
 
 OlyServer::OlyServer(int m_port)
@@ -93,7 +93,7 @@ void OlyServer::slot_new_connection()
     connect(new_connection, &QTcpSocket::disconnected, this, &OlyServer::slot_client_disconnected);
     connect(new_connection, &QTcpSocket::readyRead, this, &OlyServer::slot_read_first_msg);
     connect(new_connection, &QTcpSocket::disconnected, new_connection, &QTcpSocket::deleteLater);
-    m_edit->append("New Pending Connection..\n");
+    m_edit->append("New Pending Connection...");
 }
 
 void OlyServer::slot_read_first_msg()
@@ -122,13 +122,14 @@ void OlyServer::slot_read_first_msg()
     new_client_routes.processNewConnection();
     m_edit->append(QString("New Client With ID ") + QString::number(client_id) + QString(" Connected!"));
 
-    txt_edit[clients_online.length() - 1].clear();//TODO!! --v
+    //txt_edit[clients_online.length() - 1].clear();//TODO!! --v + delete
     ClientConnection* new_connection = new ClientConnection(this, client_id, m_client_socket, m_table, &txt_edit[clients_online.length()]);
     connected_clients.insert(client_id, m_client_socket);
     disconnect(m_client_socket, &QTcpSocket::readyRead, this, &OlyServer::slot_read_first_msg);
+    connect(m_client_socket, &QTcpSocket::disconnected, this, &OlyServer::slot_client_disconnected);
     new_connection->moveToThread(new_client);
     connect(new_client, &QThread::finished, new_connection, &QObject::deleteLater);
-    connect(new_client, &QThread::finished, this, &OlyServer::slot_client_disconnected, Qt::QueuedConnection);
+    connect(new_client, &QThread::finished, this, &OlyServer::slot_thread_finished, Qt::QueuedConnection);
     new_client->start();
 }
 
@@ -148,22 +149,7 @@ void OlyServer::slot_thread_finished()
 
 void OlyServer::slot_client_disconnected()
 {
-    QMapIterator<quint16, QTcpSocket*> map_iterator(connected_clients);
-    QVector <quint16> invalid_tcp;
-
-    while(map_iterator.hasNext())
-    {
-        map_iterator.next();
-
-        if(!map_iterator.value()->isValid())
-        {
-            invalid_tcp.push_back(map_iterator.key());
-        }
-    }
-
-    for(int i = 0; i < invalid_tcp.length(); i++)
-    {
-        m_edit->append("Client with ID " + QString::number(map_iterator.key())  + " disconnected.\n");
-        connected_clients.remove(invalid_tcp[i]);
-    }
+    quint16 key = connected_clients.key((QTcpSocket*)sender());
+    connected_clients.remove(key);
+    m_edit->append("Client with ID " + QString::number(key)  + " disconnected.\n");
 }

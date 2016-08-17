@@ -18,7 +18,6 @@ public slots:
     void slot_disconnected();
 
 public:
-    ClientConnection(int n);
     ClientConnection(OlyServer* server, quint16 ID, QTcpSocket* connection, RoutingTable *table, QTextEdit* output_field, QObject *parent = 0);
 
 private:

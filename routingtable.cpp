@@ -54,6 +54,7 @@ bool RoutingTable::deleteClientRoute(quint16 client_id, quint16 reciever_id)
 bool RoutingTable::deleteClient(quint16 client_id)
 {
     connected_clients.removeOne(client_id);
+    delete routing_table.value(client_id);
     return routing_table.remove(client_id);
 }
 

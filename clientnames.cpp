@@ -14,13 +14,16 @@ bool ClientNames::changeName(quint16 client_id, QString* new_name)
 {
     bool exist = names.value(client_id);
 
-
     if(exist)
     {
+        QString* name = names.value(client_id);
+        names.remove(client_id);
+        delete name;
+
         if(!new_name)
         {
-            QString* default_name = new QString("ID " + QString::number(client_id));
-            names.insert(client_id, default_name);
+            name = new QString("ID " + QString::number(client_id));
+            names.insert(client_id, name);
         }
         else
             names.insert(client_id, new_name);
@@ -43,6 +46,9 @@ void ClientNames::addNewClient(quint16 client_id, QString* name)
 
 bool ClientNames::deleteClient(quint16 client_id)
 {
+    QString* name = names.value(client_id);
+    if(name)
+        delete name;
     return names.remove(client_id);
 }
 
@@ -54,6 +60,7 @@ ClientNames::~ClientNames()
 
     for(int i = 0; i < list_size; i++)
     {
-        delete str_to_delete.value(i);
+        if(str_to_delete.value(i))
+            delete str_to_delete.value(i);
     }
 }

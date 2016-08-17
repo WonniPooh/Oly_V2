@@ -118,7 +118,6 @@ void RoutingWidget::changeExistingConnection()
 
 void RoutingWidget::processNewConnection()
 {
-
     const QVector<quint16>* connected_clients = table->getConnectedClients();
 
     QVector<quint16>* new_client_routes = new QVector<quint16>;
