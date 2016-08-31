@@ -11,34 +11,34 @@ class ClientNames;
 class RoutingTable;
 class ClientConnection;
 class QTextEdit;
-class QVBoxLayout;
-class QHBoxLayout;
+class MyTcpServer;
+class QGridLayout;
 
-class OlyServer : public QWidget
+class OlyServer : public QWidget, QTcpServer
 {
     Q_OBJECT
 public slots:
-    void slot_new_connection();
-    void slot_read_first_msg();
     void slot_thread_finished();
     void slot_client_disconnected();
+    void slot_new_connection(quint16 client_id, QSharedPointer<QTextEdit> client_status_field);
 
 public:
     OlyServer(int m_port);
     ~OlyServer();
-    QTcpSocket* get_connection(quint16 client_ID);
+    ClientConnection* getConnection(quint16 client_id);
+
+protected:
+    void incomingConnection(qintptr socketDescriptor) Q_DECL_OVERRIDE;
 
 private:
-
+    int grid_row_pos;
+    int grid_column_pos;
     RoutingTable* m_table;
     ClientNames* m_names;
     QVector<QThread*> clients_online;
-    QTcpServer* m_tcp_server;
-    QMap <quint16, QTcpSocket*>connected_clients;
+    QMap <quint16, ClientConnection*> connected_clients;
 
-    QVBoxLayout* m_vbox;
-    QHBoxLayout* m_hbox;
-    QTextEdit* txt_edit;
+    QGridLayout* m_layout;
     QTextEdit* m_edit;
 };
 
