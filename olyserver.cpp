@@ -4,13 +4,26 @@
 #include "routingtable.h"
 #include "clientnames.h"
 #include "routingwidget.h"
+#include "olyserverwidget.h"
 
-#include <QMessageBox>
 #include <QTextEdit>
-#include <QLabel>
-#include <QGridLayout>
-#include <QScrollArea>
 #include <QThread>
+#include <QMessageBox>
+
+OlyServer::OlyServer(QTextEdit* server_status_field, int m_port, QObject *parent):QTcpServer(parent)
+{
+    m_parent = (OlyServerWidget*)parent;
+    m_table = new RoutingTable(this);
+    m_names = new ClientNames;
+    m_edit = server_status_field;
+
+    if(!QTcpServer::listen(QHostAddress::Any,  m_port))
+    {
+        QMessageBox::critical(0, "Server Error", "Unable to start the server:" + this -> errorString());
+        QTcpServer::close();
+        return;
+    }
+}
 
 OlyServer::~OlyServer()
 {
@@ -19,43 +32,20 @@ OlyServer::~OlyServer()
         clients_online[i]->quit();
         clients_online[i]->wait();
     }
-    delete m_edit;
+
     delete m_table;
     delete m_names;
 }
 
-OlyServer::OlyServer(int m_port)
+void OlyServer::slot_new_connection(quint16 client_id)
 {
-    grid_column_pos = 0;
-    grid_row_pos = 0;
-
-    QWidget* main_wdgt = new QWidget;
-    QScrollArea* scroll = new QScrollArea;
-    scroll->setWidget(main_wdgt);
-    scroll->setWidgetResizable(true);
-
-    QVBoxLayout* main_vbox = new QVBoxLayout();
-    main_vbox->addWidget(new QLabel("<H1 align = \"center\">Server</H1>"));
-    main_vbox->addWidget(scroll);
-
-    m_table = new RoutingTable(this);
-    m_names = new ClientNames;
-    m_layout = new QGridLayout(main_wdgt);
-
-    m_edit = new QTextEdit;
-    m_edit->setReadOnly(true);
-
-    if(listen(QHostAddress::Any,  m_port))
-    {
-        QMessageBox::critical(0, "Server Error", "Unable to start the server:" + this -> errorString());
-        QTcpServer::close();
-        return;
-    }
-
-    //->addWidget(m_edit);
-
-    setLayout(main_vbox);
+    m_edit->append("Client with ID " + QString::number(client_id)  + " connected.\n");
+    connected_clients.insert(client_id, (ClientConnection*)sender());
+    m_names->addNewClient(client_id, nullptr);
+    RoutingWidget set_new_rotes(client_id, m_table, m_names);
+    set_new_rotes.processNewConnection();
 }
+
 
 void OlyServer::incomingConnection(qintptr socketDescriptor)
 {
@@ -63,6 +53,7 @@ void OlyServer::incomingConnection(qintptr socketDescriptor)
     ClientConnection* new_client_connection = new ClientConnection(this, socketDescriptor);
     new_client_connection->moveToThread(new_connection);
     connect(new_connection, &QThread::finished, this, &OlyServer::slot_thread_finished);
+    connect(new_connection, &QThread::finished, new_client_connection, &ClientConnection::deleteLater);
     connect(new_client_connection, &ClientConnection::destroyed, this, &OlyServer::slot_client_disconnected);
     connect(new_connection, &QThread::started, new_client_connection, &ClientConnection::slotSocketStart);
     clients_online.push_back(new_connection);
@@ -72,14 +63,6 @@ void OlyServer::incomingConnection(qintptr socketDescriptor)
 ClientConnection* OlyServer::getConnection(quint16 client_id)
 {
     return connected_clients.value(client_id);
-}
-
-void OlyServer::slot_new_connection(quint16 client_id, QSharedPointer <QTextEdit> client_status_field)
-{
-    connected_clients.insert(client_id, (ClientConnection*)sender());
-    m_layout->addWidget(client_status_field.data(), grid_row_pos, grid_column_pos);
-    // TODO! grid_row_pos++;
-    grid_column_pos++;
 }
 
 void OlyServer::slot_thread_finished()
@@ -96,9 +79,8 @@ void OlyServer::slot_thread_finished()
     }
 }
 
-void OlyServer::slot_client_disconnected()
+void OlyServer::slot_client_disconnected(quint16 client_id)
 {
-    quint16 key = connected_clients.key((ClientConnection*)sender());
-    connected_clients.remove(key);
-    m_edit->append("Client with ID " + QString::number(key)  + " disconnected.\n");
+    connected_clients.remove(client_id);
+    m_edit->append("Client with ID " + QString::number(client_id)  + " disconnected.\n");
 }

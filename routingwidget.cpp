@@ -48,7 +48,6 @@ void RoutingWidget::changeExistingConnection()
     const QVector<quint16>* client_routes = table->getClientRoutes(client_id);
 
     int max_routes_num = connected_clients->length() - 1;
-    int id_array_pos = 0;
     bool* was_checked = new bool[2 * max_routes_num];
     QCheckBox* m_boxes = new QCheckBox[2 * max_routes_num];
     QLabel* m_lables = new QLabel[max_routes_num];
@@ -78,8 +77,6 @@ void RoutingWidget::changeExistingConnection()
             m_grid_layout->addWidget(&m_boxes[ 2*i ], i + 1, 1);
             m_grid_layout->addWidget(&m_boxes[2*i+1], i + 1, 2);
         }
-        else
-            id_array_pos = i;
     }
 
     m_grid_layout->addWidget(m_button, max_routes_num + 1, 1);
@@ -92,12 +89,12 @@ void RoutingWidget::changeExistingConnection()
 
     for(int i = 0; i < connected_clients[0].length(); i++)
     {
-        if(m_boxes[2*i].isChecked())
+        if(m_boxes[2*i + 1].isChecked())
         {
             new_client_routes->push_back(connected_clients[0][i]);
         }
 
-        if(m_boxes[2*i + 1].isChecked() && !was_checked[2*i + 1])
+        if(m_boxes[2*i].isChecked() && !was_checked[2*i + 1])
         {
             table->addNewRoute(connected_clients[0][i], client_id);
         }
@@ -148,12 +145,12 @@ void RoutingWidget::processNewConnection()
 
         for(int i = 0; i < connected_clients[0].length(); i++)
         {
-            if(m_boxes[2*i].isChecked())
+            if(m_boxes[2*i + 1].isChecked())
             {
                 new_client_routes->push_back(connected_clients[0][i]);
             }
 
-            if(m_boxes[2*i + 1].isChecked())
+            if(m_boxes[2*i].isChecked())
             {
                 table->addNewRoute(connected_clients[0][i], client_id);
             }

@@ -3,27 +3,25 @@
 #pragma once
 
 #include <QObject>
-#include <QWidget>
 #include <QtNetwork>
 #include <QMap>
 
+class OlyServerWidget;
 class ClientNames;
 class RoutingTable;
 class ClientConnection;
 class QTextEdit;
-class MyTcpServer;
-class QGridLayout;
 
-class OlyServer : public QWidget, QTcpServer
+class OlyServer : public QTcpServer
 {
     Q_OBJECT
 public slots:
     void slot_thread_finished();
-    void slot_client_disconnected();
-    void slot_new_connection(quint16 client_id, QSharedPointer<QTextEdit> client_status_field);
+    void slot_client_disconnected(quint16 client_id);
+    void slot_new_connection(quint16 client_id);
 
 public:
-    OlyServer(int m_port);
+    OlyServer(QTextEdit *server_status_field, int m_port, QObject * parent = 0);
     ~OlyServer();
     ClientConnection* getConnection(quint16 client_id);
 
@@ -31,15 +29,12 @@ protected:
     void incomingConnection(qintptr socketDescriptor) Q_DECL_OVERRIDE;
 
 private:
-    int grid_row_pos;
-    int grid_column_pos;
+    OlyServerWidget* m_parent;
     RoutingTable* m_table;
     ClientNames* m_names;
+    QTextEdit* m_edit;
     QVector<QThread*> clients_online;
     QMap <quint16, ClientConnection*> connected_clients;
-
-    QGridLayout* m_layout;
-    QTextEdit* m_edit;
 };
 
 #endif // OLYSERVER_H

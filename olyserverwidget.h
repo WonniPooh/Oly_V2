@@ -1,17 +1,33 @@
 #ifndef OLYSERVERWIDGET_H
 #define OLYSERVERWIDGET_H
+#pragma once
 
+#include <QObject>
 #include <QWidget>
+#include <QtNetwork>
+#include <QMap>
+
+class ClientNames;
+class RoutingTable;
+class ClientConnection;
+class QTextEdit;
+class MyTcpServer;
+class QGridLayout;
+class OlyServer;
 
 class OlyServerWidget : public QWidget
 {
-    Q_OBJECT
 public:
-    explicit OlyServerWidget(QWidget *parent = 0);
+    OlyServerWidget(int m_port);
+    ~OlyServerWidget();
 
-signals:
+private:
+    int grid_row_pos;
+    int grid_column_pos;
 
-public slots:
+    OlyServer* m_server;
+    QGridLayout* m_layout;
+    QTextEdit* m_edit;
 };
 
 #endif // OLYSERVERWIDGET_H

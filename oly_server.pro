@@ -15,11 +15,13 @@ SOURCES += main.cpp \
     clientconnection.cpp \
     clientnames.cpp \
     routingtable.cpp \
-    routingwidget.cpp
+    routingwidget.cpp \
+    olyserverwidget.cpp
 
 HEADERS += \
     olyserver.h \
     clientconnection.h \
     clientnames.h \
     routingtable.h \
-    routingwidget.h
+    routingwidget.h \
+    olyserverwidget.h
