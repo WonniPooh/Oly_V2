@@ -9,12 +9,14 @@
 #include <QThread>
 #include <QMessageBox>
 
-OlyServer::OlyServer(QTextEdit* server_status_field, int m_port, ClientNames *names, QObject *parent):QTcpServer(parent)
+OlyServer::OlyServer(QTextEdit* server_status_field, int m_port, ClientNames *names, OlyServerWidget* class_parent, QObject *parent):QTcpServer(parent)
 {
-    m_parent = (OlyServerWidget*)parent;
+    m_parent = class_parent;
     m_table = new RoutingTable(this);
     m_edit = server_status_field;
     m_names = names;
+
+    connect(m_parent, &OlyServerWidget::nameSet, this, &OlyServer::slot_new_connection);
 
     if(!QTcpServer::listen(QHostAddress::Any,  m_port))
     {
@@ -35,22 +37,22 @@ OlyServer::~OlyServer()
     delete m_table;
 }
 
-void OlyServer::slot_new_connection(quint16 client_id)
+void OlyServer::slot_new_connection(quint16 client_id, ClientConnection* sender)
 {
-    m_edit->append("Client with ID " + QString::number(client_id)  + " connected.\n");
-    connected_clients.insert(client_id, (ClientConnection*)sender());
+    m_edit->append("Client \""+ m_names->getClientName(client_id) + "\" with ID" + QString::number(client_id)  + " connected.\n");
+    connected_clients.insert(client_id, sender);
     m_table->processNewConnection(client_id, m_names);
 }
 
 void OlyServer::incomingConnection(qintptr socketDescriptor)
 {
     QThread* new_connection = new QThread;
-    ClientConnection* new_client_connection = new ClientConnection(this, socketDescriptor);
+    ClientConnection* new_client_connection = new ClientConnection(socketDescriptor);
     new_client_connection->moveToThread(new_connection);
 
-    connect(new_connection, &QThread::started, new_client_connection, &ClientConnection::slotSocketStart);
     connect(new_connection, &QThread::finished, this, &OlyServer::slotThreadFinished);
     connect(new_connection, &QThread::finished, new_client_connection, &ClientConnection::deleteLater);
+    connect(new_connection, &QThread::started, new_client_connection, &ClientConnection::slotSocketStart);
 
     connect(new_client_connection, &ClientConnection::sendData, m_parent, &OlyServerWidget::newMsg);
     connect(new_client_connection, &ClientConnection::destroyed, this, &OlyServer::slotClientDisconnected);

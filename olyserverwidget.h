@@ -16,6 +16,7 @@ class MyTcpServer;
 class QGridLayout;
 class OlyServer;
 class QLabel;
+class ClientConnection;
 
 typedef QSharedPointer<QString> shared_data;
 
@@ -29,6 +30,9 @@ struct StatusFieldData
 class OlyServerWidget : public QWidget
 {
     Q_OBJECT
+
+signals:
+    void  nameSet(quint16 client_id, ClientConnection* sender);
 
 public slots:
     void  newMsg(quint16 client_id, shared_data forwarded_data);

@@ -26,7 +26,7 @@ public slots:
     void slotSendData(quint16 client_id, shared_data data_to_forward);
 
 public:
-    ClientConnection(OlyServer* server_ptr, int descriptor, QObject *parent = 0);
+    ClientConnection(int descriptor, QObject *parent = 0);
     ~ClientConnection();
 private:
 

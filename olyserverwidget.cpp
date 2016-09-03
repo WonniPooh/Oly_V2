@@ -1,6 +1,7 @@
 #include "olyserverwidget.h"
 #include "olyserver.h"
 #include "clientnames.h"
+#include "clientconnection.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -50,7 +51,11 @@ void  OlyServerWidget::slotClientConnected(quint16 client_id)
 {
     StatusFieldData* field = new StatusFieldData;
     field->status_field = new QTextEdit;
+    field->status_field->setReadOnly(true);
+
+    m_names->processNewConnection(client_id);
     field->field_title = new QLabel(m_names->getClientName(client_id));
+    field->field_title->setAlignment(Qt::AlignCenter);
     field->field_coords = QPoint(grid_column_pos, grid_row_pos);
 
     m_client_status_fields.insert(client_id, field);
@@ -60,6 +65,7 @@ void  OlyServerWidget::slotClientConnected(quint16 client_id)
 
     grid_row_pos += 2 * (grid_column_pos / 3);
     grid_column_pos = grid_column_pos % 3;
+    emit nameSet(client_id, qobject_cast<ClientConnection*>(sender()));
 }
 
 void  OlyServerWidget::newMsg(quint16 client_id, shared_data forwarded_data)

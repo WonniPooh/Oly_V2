@@ -12,7 +12,7 @@ public:
     ~ClientNames();
     const QString& getClientName(quint16 client_id);
     bool changeName(quint16 client_id, QString* new_name);
-    void addNewClient(quint16 client_id, QString* name);
+    void processNewConnection(quint16 client_id);
     bool deleteClient(quint16 client_id);
 
 private:

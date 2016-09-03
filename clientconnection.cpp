@@ -2,11 +2,9 @@
 #include "clientconnection.h"
 #include "olyserver.h"
 
-ClientConnection::ClientConnection(OlyServer* server_ptr, int descriptor, QObject *parent) : QObject(parent)
+ClientConnection::ClientConnection(int descriptor, QObject *parent) : QObject(parent)
 {
-    assert(server_ptr);
     qRegisterMetaType<shared_data>("shared_data");
-    connect(this, &ClientConnection::newConnection, server_ptr, &OlyServer::slot_new_connection);
     socket_descriptor = descriptor;
     msg_counter = 0;
     client_id = 0;
