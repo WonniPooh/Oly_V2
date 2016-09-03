@@ -54,13 +54,7 @@ bool ClientNames::deleteClient(quint16 client_id)
 
 ClientNames::~ClientNames()
 {
-    /*QList<QString*> str_to_delete = names.values();
-
-    int list_size = str_to_delete.length();
-
-    for(int i = 0; i < list_size; i++)
-    {
-        if(str_to_delete.value(i))
-            delete str_to_delete.value(i);
-    }*/
+    QMap <quint16, QString*>::iterator i = names.begin();
+    for(; i != names.end(); i++)
+        delete i.value();
 }

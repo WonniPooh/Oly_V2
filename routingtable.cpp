@@ -1,13 +1,52 @@
+#include <assert.h>
+#include <QObject>
 #include "olyserver.h"
 #include "routingtable.h"
 #include "clientconnection.h"
-#include <assert.h>
-#include <QObject>
+#include "routingwidget.h"
 
 RoutingTable::RoutingTable(OlyServer *server_ptr)
 {
     assert(server_ptr);
     current_server = server_ptr;
+}
+
+RoutingTable::~RoutingTable()
+{
+    QMap <quint16, QVector<quint16>*>::iterator i = routing_table.begin();
+
+    for(; i!= routing_table.end(); i++)
+    {
+        if(i.value())
+            delete i.value();
+    }
+}
+
+void RoutingTable::processNewConnection(quint16 client_id, ClientNames *names)
+{
+    if(connected_clients.indexOf(client_id) == -1)
+    {
+        names->addNewClient(client_id, nullptr);
+        RoutingWidget set_new_rotes(client_id, this, names);
+        set_new_rotes.processNewConnection();
+    }
+    else
+    {
+        setConnects(client_id, routing_table.value(client_id));
+        QMap <quint16, QVector<quint16>*>::iterator i = routing_table.begin();
+
+        for(; i != routing_table.end(); i++)
+        {
+            if(current_server->getConnection(client_id))
+            {
+                for(int j = 0; j < i.value()->length(); j++)
+                {
+                    if(i.value()->indexOf(client_id) != -1)
+                        setConnects(i.key(), client_id);
+                }
+            }
+        }
+    }
 }
 
 void RoutingTable::setConnects(quint16 client_id, QVector<quint16>* routes)

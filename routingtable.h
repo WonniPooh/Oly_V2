@@ -4,6 +4,7 @@
 
 #include <QWidget>
 #include <QMap>
+#include "clientnames.h"
 
 class OlyServer;
 
@@ -11,6 +12,10 @@ class RoutingTable
 {
 public:
     RoutingTable(OlyServer* server_ptr);
+    ~RoutingTable();
+
+    void processNewConnection(quint16 client_id, ClientNames* names);
+
     const QVector<quint16>* getConnectedClients();
     const QVector<quint16>* getClientRoutes(quint16 client_id);
 

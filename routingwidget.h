@@ -33,8 +33,8 @@ private:
     QLabel* m_dialog_header;
     QScrollArea* m_scroll;
     QWidget* m_widget;
-    QLabel* lable_to;
-    QLabel* lable_from;
+    QLabel* label_to;
+    QLabel* label_from;
     QPushButton* m_button;
 
     QGridLayout* m_grid_layout;

@@ -16,12 +16,12 @@ class OlyServer : public QTcpServer
 {
     Q_OBJECT
 public slots:
-    void slot_thread_finished();
-    void slot_client_disconnected(quint16 client_id);
+    void slotThreadFinished();
+    void slotClientDisconnected(quint16 client_id);
     void slot_new_connection(quint16 client_id);
 
 public:
-    OlyServer(QTextEdit *server_status_field, int m_port, QObject * parent = 0);
+    OlyServer(QTextEdit *server_status_field, int m_port, ClientNames* names, QObject * parent = 0);
     ~OlyServer();
     ClientConnection* getConnection(quint16 client_id);
 
