@@ -7,9 +7,7 @@
 #include <QtNetwork>
 #include <QMap>
 
-
 class ClientNames;
-class RoutingTable;
 class ClientConnection;
 class QTextEdit;
 class MyTcpServer;

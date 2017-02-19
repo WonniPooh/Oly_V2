@@ -14,8 +14,6 @@ SOURCES += main.cpp \
     olyserver.cpp \
     clientconnection.cpp \
     clientnames.cpp \
-    routingtable.cpp \
-    routingwidget.cpp \
     olyserverwidget.cpp \
     clientnameswidget.cpp
 
@@ -23,7 +21,5 @@ HEADERS += \
     olyserver.h \
     clientconnection.h \
     clientnames.h \
-    routingtable.h \
-    routingwidget.h \
     olyserverwidget.h \
     clientnameswidget.h

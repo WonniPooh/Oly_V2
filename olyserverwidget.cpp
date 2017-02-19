@@ -17,6 +17,7 @@ OlyServerWidget::~OlyServerWidget()
     delete m_layout;
 }
 
+//creates widget, register QString as Metatype to pass it through signals, creates new Names and Oly_server classes
 OlyServerWidget::OlyServerWidget(int m_port)
 {
     grid_column_pos = 0;
@@ -47,6 +48,7 @@ OlyServerWidget::OlyServerWidget(int m_port)
     m_server = new OlyServer(m_edit, m_port, m_names, this);
 }
 
+//creates new status_field to list income msges, and inits name set function
 void  OlyServerWidget::slotClientConnected(quint16 client_id)
 {
     StatusFieldData* field = new StatusFieldData;
@@ -68,12 +70,14 @@ void  OlyServerWidget::slotClientConnected(quint16 client_id)
     emit nameSet(client_id, qobject_cast<ClientConnection*>(sender()));
 }
 
+//prints msg recieved on the screen
 void  OlyServerWidget::newMsg(quint16 client_id, shared_data forwarded_data)
 {
     StatusFieldData* client_field = m_client_status_fields.value(client_id);
     client_field->status_field->append(*forwarded_data.data());
 }
 
+//remove textfield of disconnected client and move other filling empty space
 void  OlyServerWidget::slotClientDisconnected(quint16 client_id)
 {
     QMap<quint16, StatusFieldData*>::iterator i = m_client_status_fields.begin();
